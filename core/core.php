@@ -88,12 +88,12 @@ final class PRFCHN_Core {
 	/**
 	 * Update user profile hook
 	 *
-	 * @param int    $user_id       User ID.
-	 * @param object $old_user_data Object containing user's data prior to update.
+	 * @param int    $userId       User ID.
+	 * @param object $oldUserData Object containing user's data prior to update.
 	 */
-	public function updateProfile($user_id, $old_user_data) {
+	public function updateProfile($userId, $oldUserData) {
 		$this->loadProfileObject();
-		$this->profile->check($user_id);
+		$this->profile->check($userId);
 	}
 
 
