@@ -56,13 +56,13 @@ final class PRFCHN_Core {
 	private function __construct() {
 
 		// This action only fires if the current user is editing their own profile.
-		add_action('show_user_profile', array(&$this, 'showUserProfile'));
+		add_action('show_user_profile', array(&$this, 'showUserProfile'), 999999);
 
 		// Fires after the 'About the User' settings table on the 'Edit User' screen.
-		add_action('edit_user_profile', array(&$this, 'showUserProfile'));
+		add_action('edit_user_profile', array(&$this, 'showUserProfile'), 999999);
 
 		// Fires immediately after an existing user is updated (from wp_insert_user function)
-		add_action('profile_update', array(&$this, 'updateProfile'), 10, 2);
+		add_action('profile_update', array(&$this, 'updateProfile'), 999999);
 	}
 
 
@@ -89,9 +89,8 @@ final class PRFCHN_Core {
 	 * Update user profile hook
 	 *
 	 * @param int    $userId       User ID.
-	 * @param object $oldUserData Object containing user's data prior to update.
 	 */
-	public function updateProfile($userId, $oldUserData) {
+	public function updateProfile($userId) {
 		$this->loadProfileObject();
 		$this->profile->check($userId);
 	}

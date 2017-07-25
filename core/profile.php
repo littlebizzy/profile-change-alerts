@@ -26,12 +26,12 @@ final class PRFCHN_Core_Profile {
 	 * WP User object properties
 	 */
 	private $userProperties = array(
-		'user_pass' 	=> 'Password',
-		'user_nicename' => 'Nicename',
-		'user_email'	=> 'User email',
-		'user_url'		=> 'User URL',
-		'user_status'	=> 'User status',
-		'display_name' 	=> 'Display name',
+		'user_pass' 			=> 'Password',
+		'user_nicename' 		=> 'Nicename',
+		'user_email'			=> 'User email',
+		'user_url'				=> 'User URL',
+		'user_status'			=> 'User status',
+		'display_name' 			=> 'Display name',
 	);
 
 
@@ -48,6 +48,42 @@ final class PRFCHN_Core_Profile {
 		'comment_shortcuts' 	=> 'Keyboard shortcuts',
 		'admin_color' 			=> 'Admin Color Scheme',
 		'show_admin_bar_front' 	=> 'Show front Toolbar',
+	);
+
+
+
+	/**
+	 * Woocommerce Billing data
+	 */
+	private $userWCBilling = array(
+		'billing_first_name' 	=> 'First name',
+		'billing_last_name' 	=> 'Last name',
+		'billing_company'		=> 'Company',
+		'billing_address_1'		=> 'Address line 1',
+		'billing_address_2'		=> 'Address line 2',
+		'billing_city'			=> 'City',
+		'billing_postcode' 		=> 'Postcode / ZIP',
+		'billing_country' 		=> 'Country',
+		'billing_state' 		=> 'State / County',
+		'billing_phone' 		=> 'Phone',
+		'billing_email' 		=> 'Email address',
+	);
+
+
+
+	/**
+	 * Woocommerce Shipping data
+	 */
+	private $userWCShipping = array(
+		'shipping_first_name' 	=> 'First name',
+		'shipping_last_name' 	=> 'Last name',
+		'shipping_company'		=> 'Company',
+		'shipping_address_1'	=> 'Address line 1',
+		'shipping_address_2'	=> 'Address line 2',
+		'shipping_city'			=> 'City',
+		'shipping_postcode' 	=> 'Postcode / ZIP',
+		'shipping_country' 		=> 'Country',
+		'shipping_state' 		=> 'State / County',
 	);
 
 
@@ -94,9 +130,15 @@ final class PRFCHN_Core_Profile {
 		// Initialize
 		$userProfileData = array();
 
+
+		/* WP User profile object */
+
 		// Collect WP User object data
 		foreach ($this->userProperties as $property => $label)
 			$userProfileData['user_'.$property] = isset($userProfileWP->data->$property)? $userProfileWP->data->$property : '';
+
+
+		/* WP User profile metadata */
 
 		// WP stored user metadata
 		$metaDataWP = get_user_meta($userProfileWP->ID);
@@ -106,6 +148,18 @@ final class PRFCHN_Core_Profile {
 		// Collect WP User metadata
 		foreach ($this->userMetaData as $key => $label)
 			$userProfileData['meta_'.$key] = isset($metaDataWP[$key][0])? $metaDataWP[$key][0] : '';
+
+
+		/* WooCommerce Profile data */
+
+		// Copy Billing fields
+		foreach ($this->userWCBilling as $key => $label)
+			$userProfileData['wc_billing_'.$key] = get_user_meta($userProfileWP->ID, $key, true);
+
+		// Copy Shipping fields
+		foreach ($this->userWCShipping as $key => $label)
+			$userProfileData['wc_shipping_'.$key] = get_user_meta($userProfileWP->ID, $key, true);
+
 
 		// Save selected profile data
 		$this->setUserProfileData($userProfileWP->ID, $userProfileData);
@@ -123,6 +177,9 @@ final class PRFCHN_Core_Profile {
 		// Retrieve decoded user profile data
 		if (false === ($userProfileData = $this->getUserProfileData($userId)))
 			return;
+
+
+		/* WP User profile object */
 
 		// Retrieve user
 		$userProfileWP = get_user_by('id', $userId);
@@ -146,6 +203,9 @@ final class PRFCHN_Core_Profile {
 			}
 		}
 
+
+		/* WP User profile metadata */
+
 		// WP stored user metadata
 		$metaDataWP = get_user_meta($userId);
 		if (empty($metaDataWP) || !is_array($metaDataWP))
@@ -164,6 +224,44 @@ final class PRFCHN_Core_Profile {
 				$userProfileData['meta_'.$key] = $value;
 			}
 		}
+
+
+		/* WooCommerce Profile data */
+
+		// Check WC profile class and user permissions
+		if (class_exists('WC_Admin_Profile') && current_user_can('manage_woocommerce')) {
+
+			// Check Billing changes
+			foreach ($this->userWCBilling as $key => $label) {
+
+				// Previous and current values
+				$old = isset($userProfileData['wc_billing_'.$key ])? $userProfileData['wc_billing_'.$key ] : '';
+				$value = ''.get_user_meta($userId, $key, true);
+
+				// Compare values
+				if ($value != $old) {
+					$changed[] = array($label.' - Customer billing address', $old, $value);
+					$userProfileData['wc_billing_'.$key] = $value;
+				}
+			}
+
+			// Check Shipping changes
+			foreach ($this->userWCShipping as $key => $label) {
+
+				// Previous and current values
+				$old = isset($userProfileData['wc_shipping_'.$key ])? $userProfileData['wc_shipping_'.$key ] : '';
+				$value = ''.get_user_meta($userId, $key, true);
+
+				// Compare values
+				if ($value != $old) {
+					$changed[] = array($label.' - Customer shipping address', $old, $value);
+					$userProfileData['wc_shipping_'.$key] = $value;
+				}
+			}
+		}
+
+
+		/* Check the changes */
 
 		// Check changes
 		if (!empty($changed)) {
