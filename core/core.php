@@ -63,6 +63,12 @@ final class PRFCHN_Core {
 
 		// Fires immediately after an existing user is updated (from wp_insert_user function)
 		add_action('profile_update', array(&$this, 'updateProfile'), 999999);
+
+		// After a WC template is served
+		add_action('woocommerce_after_template_part', 	array(&$this, 'afterWCTemplatePart'), 999999, 4);
+
+		// When an address has been saved
+		add_action('woocommerce_customer_save_address', array(&$this, 'customerSaveWCAddress'), 999999, 2);
 	}
 
 
@@ -93,6 +99,35 @@ final class PRFCHN_Core {
 	public function updateProfile($userId) {
 		$this->loadProfileObject();
 		$this->profile->check($userId);
+	}
+
+
+
+	/**
+	 * Handle WC template load
+	 */
+	public function afterWCTemplatePart($template_name, $template_path, $located, $args) {
+
+		// Check template (allows custom templates)
+		if ('myaccount/form-edit-address.php' == $template_name) {
+
+			// Check load address argument
+			if (!empty($args['load_address']) && in_array($args['load_address'], array('billing', 'shipping'))) {
+
+				// Save profile data
+				$this->loadProfileObject();
+				$this->profile->saveWCAccountAddress($args['load_address']);
+			}
+		}
+	}
+
+
+
+	/**
+	 * Handle changes when address data is saved
+	 */
+	public function customerSaveWCAddress($user_id, $load_address) {
+
 	}
 
 

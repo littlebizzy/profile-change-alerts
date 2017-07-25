@@ -127,8 +127,9 @@ final class PRFCHN_Core_Profile {
 	 */
 	public function save($userProfileWP) {
 
-		// Initialize
-		$userProfileData = array();
+		// Retrieve previous user profile data
+		if (false === ($userProfileData = $this->getUserProfileData($userProfileWP->ID)))
+			$userProfileData = array();
 
 
 		/* WP User profile object */
@@ -154,11 +155,11 @@ final class PRFCHN_Core_Profile {
 
 		// Copy Billing fields
 		foreach ($this->userWCBilling as $key => $label)
-			$userProfileData['wc_billing_'.$key] = get_user_meta($userProfileWP->ID, $key, true);
+			$userProfileData['wc_billing_'.$key] = ''.get_user_meta($userProfileWP->ID, $key, true);
 
 		// Copy Shipping fields
 		foreach ($this->userWCShipping as $key => $label)
-			$userProfileData['wc_shipping_'.$key] = get_user_meta($userProfileWP->ID, $key, true);
+			$userProfileData['wc_shipping_'.$key] = ''.get_user_meta($userProfileWP->ID, $key, true);
 
 
 		// Save selected profile data
@@ -272,6 +273,48 @@ final class PRFCHN_Core_Profile {
 			// Notify by email
 			// ..
 		}
+	}
+
+
+
+	// WC Front Account
+	// ---------------------------------------------------------------------------------------------------
+
+
+
+	/**
+	 * Save WC address when the proper template is displayed
+	 */
+	public function saveWCAccountAddress($type) {
+
+		// Check current user
+		$userId = get_current_user_id();
+		if (empty($userId))
+			return;
+
+		// Retrieve previous user profile data
+		if (false === ($userProfileData = $this->getUserProfileData($userId)))
+			$userProfileData = array();
+
+		// Prepare fields
+		$fields = ('billing' == $type)? $this->userWCBilling : $this->userWCShipping;
+		$prefix = ('billing' == $type)? 'wc_billing_' : 'wc_shipping_';
+
+		// Copy fields
+		foreach ($fields as $key => $label)
+			$userProfileData[$prefix.$key] = ''.get_user_meta($userId, $key, true);
+
+		// Update profile data
+		$this->setUserProfileData($userId, $userProfileData);
+	}
+
+
+
+	/**
+	 * Check if saved data has changes
+	 */
+	public function checkWCAccountAddress($type) {
+
 	}
 
 
