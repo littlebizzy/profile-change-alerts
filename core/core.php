@@ -126,8 +126,15 @@ final class PRFCHN_Core {
 	/**
 	 * Handle changes when address data is saved
 	 */
-	public function customerSaveWCAddress($user_id, $load_address) {
+	public function customerSaveWCAddress($userId, $loadAddress) {
 
+		// Check address type
+		if (in_array($loadAddress, array('billing', 'shipping'))) {
+
+			// Check address data
+			$this->loadProfileObject();
+			$this->profile->checkWCAccountAddress($userId, $loadAddress);
+		}
 	}
 
 
