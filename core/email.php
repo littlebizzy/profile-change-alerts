@@ -49,4 +49,50 @@ final class PRFCHN_Core_Email {
 
 
 
+	// Public methods
+	// ---------------------------------------------------------------------------------------------------
+
+
+
+	/**
+	 * Profile changes notification
+	 */
+	public function notify($userId, $changed) {
+
+		// Retrieve user
+		if (false === ($user = get_user_by('id', (int) $userId)))
+			return;
+
+		// Prepare emails
+		$admin_email = get_option('admin_email');
+		$user_email  = $user->user_email;
+
+		// Check emails
+		if (empty($admin_email) && empty($user_email))
+			return;
+error_log($admin_email);
+error_log($user_email);
+		// Message header
+		$message  = 'The following changes have been detected:'."\n";
+		$message .= "\n".'User: '.$user->user_login;
+		$message .= "\n".'Profile: '.add_query_arg('user_id', $userId, self_admin_url('user-edit.php'));
+
+		// Enum changes
+		foreach ($changed as $change) {
+			$message .= "\n\n".'- '.$change[0];
+			$message .= "\n".'Old value: '.$change[1];
+			$message .= "\n".'New value: '.$change[2];
+		}
+error_log($message);
+		// Send to administrator
+		if (!empty($admin_email))
+			wp_mail($admin_email, 'Profile Change Alerts: detected changes in user profile', $message);
+
+		// Send to user email
+		if (!empty($admin_email) && $user_email != $admin_email)
+			wp_mail($admin_email, 'Profile Change Alerts: detected changes in your profile', $message);
+	}
+
+
+
 }
