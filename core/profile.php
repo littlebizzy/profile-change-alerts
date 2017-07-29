@@ -216,7 +216,7 @@ final class PRFCHN_Core_Profile {
 		foreach ($this->userMetaData as $key => $label) {
 
 			// Previous and current values
-			$old = isset($userProfileData['meta_'.$key ])? $userProfileData['meta_'.$key ] : '';
+			$old = isset($userProfileData['meta_'.$key])? $userProfileData['meta_'.$key] : '';
 			$value = isset($metaDataWP[$key][0])? $metaDataWP[$key][0] : '';
 
 			// Compare values
@@ -236,7 +236,7 @@ final class PRFCHN_Core_Profile {
 			foreach ($this->userWCBilling as $key => $label) {
 
 				// Previous and current values
-				$old = isset($userProfileData['wc_billing_'.$key ])? $userProfileData['wc_billing_'.$key ] : '';
+				$old = isset($userProfileData['wc_billing_'.$key])? $userProfileData['wc_billing_'.$key] : '';
 				$value = ''.get_user_meta($userId, $key, true);
 
 				// Compare values
@@ -250,7 +250,7 @@ final class PRFCHN_Core_Profile {
 			foreach ($this->userWCShipping as $key => $label) {
 
 				// Previous and current values
-				$old = isset($userProfileData['wc_shipping_'.$key ])? $userProfileData['wc_shipping_'.$key ] : '';
+				$old = isset($userProfileData['wc_shipping_'.$key])? $userProfileData['wc_shipping_'.$key] : '';
 				$value = ''.get_user_meta($userId, $key, true);
 
 				// Compare values
@@ -271,7 +271,8 @@ final class PRFCHN_Core_Profile {
 			$this->setUserProfileData($userId, $userProfileData);
 
 			// Notify by email
-			// ..
+			require_once(PRFCHN_PATH.'/core/email.php');
+			PRFCHN_Core_Email::instance()->notify($userId, $changed);
 		}
 	}
 
@@ -311,10 +312,54 @@ final class PRFCHN_Core_Profile {
 
 
 	/**
-	 * Check if saved data has changes
+	 * Check if saved address data has changes
 	 */
-	public function checkWCAccountAddress($type) {
+	public function checkWCAccountAddress($userID, $type) {
 
+
+		/* Initialization */
+
+		// Retrieve decoded user profile data
+		if (false === ($userProfileData = $this->getUserProfileData($userId)))
+			return;
+
+		// Initialize
+		$changed = array();
+
+		// Prepare fields
+		$fields = ('billing' == $type)? $this->userWCBilling : $this->userWCShipping;
+		$prefix = ('billing' == $type)? 'wc_billing_' : 'wc_shipping_';
+
+
+		/* WC commerce adress changes check */
+
+		// Check Address values
+		foreach ($field as $key => $label) {
+
+			// Previous and current values
+			$old = isset($userProfileData[$prefix.$key])? $userProfileData[$prefix.$key] : '';
+			$value = ''.get_user_meta($userId, $key, true);
+
+			// Compare values
+			if ($value != $old) {
+				$changed[] = array($label.' - Woocommerce '.$type.' address', $old, $value);
+				$userProfileData[$prefix.$key] = $value;
+			}
+		}
+
+
+		/* Check any change */
+
+		// Check changes
+		if (!empty($changed)) {
+
+			// Save current data
+			$this->setUserProfileData($userId, $userProfileData);
+
+			// Notify by email
+			require_once(PRFCHN_PATH.'/core/email.php');
+			PRFCHN_Core_Email::instance()->notify($userId, $changed);
+		}
 	}
 
 
@@ -328,9 +373,19 @@ final class PRFCHN_Core_Profile {
 	 * Get user profile data
 	 */
 	private function getUserProfileData($userId) {
+
+		// Retrieve data
 		$userProfileData = get_user_meta($userId, 'prfchn_profile', true);
 		$userProfileData = empty($userProfileData)? false : @json_decode($userProfileData, true);
-		return (empty($userProfileData) || !is_array($userProfileData))? false : $userProfileData;
+		if (empty($userProfileData) || !is_array($userProfileData))
+			return false;
+
+		// No need to html entities
+		if (version_compare(phpversion(), '5.4.0', '>='))
+			return $userProfileData;
+
+		// Decode entities
+		return array_map('html_entity_decode', $userProfileData);
 	}
 
 
@@ -341,7 +396,22 @@ final class PRFCHN_Core_Profile {
 	 * @param $data Array
 	 */
 	private function setUserProfileData($userId, $userProfileData) {
-		update_user_meta($userId, 'prfchn_profile', @json_encode($userProfileData));
+
+		// Unescape unicode
+		if (version_compare(phpversion(), '5.4.0', '>=')) {
+
+			// Unescape unicode
+			$json = @json_encode($userProfileData, JSON_UNESCAPED_UNICODE);
+
+		// Use entities
+		} else {
+
+			// Use htmlentities
+			$json = @json_encode(array_map('htmlentities', $userProfileData));
+		}
+
+		// Save data
+		update_user_meta($userId, 'prfchn_profile', $json);
 	}
 
 
