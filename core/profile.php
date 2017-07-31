@@ -138,6 +138,11 @@ final class PRFCHN_Core_Profile {
 		foreach ($this->userProperties as $property => $label)
 			$userProfileData['user_'.$property] = isset($userProfileWP->data->$property)? $userProfileWP->data->$property : '';
 
+		// Save user roles
+		$roles = empty($userProfileWP->roles)? array() : array_values($userProfileWP->roles);
+		asort($roles);
+		$userProfileData['user_roles'] = implode(',', $roles);
+
 
 		/* WP User profile metadata */
 
@@ -180,7 +185,7 @@ final class PRFCHN_Core_Profile {
 			return;
 
 
-		/* WP User profile object */
+		/* Initialization */
 
 		// Retrieve user
 		$userProfileWP = get_user_by('id', $userId);
@@ -189,6 +194,9 @@ final class PRFCHN_Core_Profile {
 
 		// Initialize
 		$changed = array();
+
+
+		/* WP User profile object */
 
 		// Check object properties changes
 		foreach ($this->userProperties as $property => $label) {
@@ -202,6 +210,18 @@ final class PRFCHN_Core_Profile {
 				$changed[] = array($label, $old, $value);
 				$userProfileData['user_'.$property] = $value;
 			}
+		}
+
+		// Prepare user roles
+		$old = isset($userProfileData['user_roles'])? $userProfileData['user_roles'] : '';
+		$roles = empty($userProfileWP->roles)? array() : array_values($userProfileWP->roles);
+		asort($roles);
+		$value = implode(',', $roles);
+
+		// Compare values
+		if ($value != $old) {
+			$changed[] = array('User roles', $old, $value);
+			$userProfileData['user_roles'] = $value;
 		}
 
 
