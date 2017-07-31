@@ -70,8 +70,7 @@ final class PRFCHN_Core_Email {
 		// Check emails
 		if (empty($admin_email) && empty($user_email))
 			return;
-error_log($admin_email);
-error_log($user_email);
+
 		// Message header
 		$message  = 'The following changes have been detected:'."\n";
 		$message .= "\n".'User: '.$user->user_login;
@@ -83,14 +82,14 @@ error_log($user_email);
 			$message .= "\n".'Old value: '.$change[1];
 			$message .= "\n".'New value: '.$change[2];
 		}
-error_log($message);
+
 		// Send to administrator
 		if (!empty($admin_email))
 			wp_mail($admin_email, 'Profile Change Alerts: detected changes in user profile', $message);
 
 		// Send to user email
-		if (!empty($admin_email) && $user_email != $admin_email)
-			wp_mail($admin_email, 'Profile Change Alerts: detected changes in your profile', $message);
+		if (!empty($user_email) && $user_email != $admin_email)
+			wp_mail($user_email, 'Profile Change Alerts: detected changes in your profile', $message);
 	}
 
 
