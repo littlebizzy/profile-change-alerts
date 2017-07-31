@@ -264,7 +264,7 @@ final class PRFCHN_Core_Profile {
 
 				// Compare values
 				if ($value != $old) {
-					$changed[] = array($label.' - Customer billing address', $old, $value);
+					$changed[] = array($label.' (Customer billing address)', $old, $value);
 					$userProfileData['wc_billing_'.$key] = $value;
 				}
 			}
@@ -278,7 +278,7 @@ final class PRFCHN_Core_Profile {
 
 				// Compare values
 				if ($value != $old) {
-					$changed[] = array($label.' - Customer shipping address', $old, $value);
+					$changed[] = array($label.' (Customer shipping address)', $old, $value);
 					$userProfileData['wc_shipping_'.$key] = $value;
 				}
 			}
@@ -337,7 +337,7 @@ final class PRFCHN_Core_Profile {
 	/**
 	 * Check if saved address data has changes
 	 */
-	public function checkWCAccountAddress($userID, $type) {
+	public function checkWCAccountAddress($userId, $type) {
 
 
 		/* Initialization */
@@ -357,7 +357,7 @@ final class PRFCHN_Core_Profile {
 		/* WC commerce adress changes check */
 
 		// Check Address values
-		foreach ($field as $key => $label) {
+		foreach ($fields as $key => $label) {
 
 			// Previous and current values
 			$old = isset($userProfileData[$prefix.$key])? $userProfileData[$prefix.$key] : '';
@@ -365,7 +365,7 @@ final class PRFCHN_Core_Profile {
 
 			// Compare values
 			if ($value != $old) {
-				$changed[] = array($label.' - Woocommerce '.$type.' address', $old, $value);
+				$changed[] = array($label.' (Woocommerce '.$type.' address)', $old, $value);
 				$userProfileData[$prefix.$key] = $value;
 			}
 		}
