@@ -212,6 +212,9 @@ final class PRFCHN_Core_Profile {
 			}
 		}
 
+
+		/* User roles */
+
 		// Prepare user roles
 		$old = isset($userProfileData['user_roles'])? $userProfileData['user_roles'] : '';
 		$roles = empty($userProfileWP->roles)? array() : array_values($userProfileWP->roles);
