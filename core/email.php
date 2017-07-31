@@ -82,7 +82,7 @@ final class PRFCHN_Core_Email {
 			$message .= "\n".'Old value: '.$change[1];
 			$message .= "\n".'New value: '.$change[2];
 		}
-error_log($message);
+
 		// Send to administrator
 		if (!empty($admin_email))
 			wp_mail($admin_email, 'Profile Change Alerts: detected changes in user profile', $message);
