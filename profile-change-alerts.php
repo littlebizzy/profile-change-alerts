@@ -3,7 +3,7 @@
 Plugin Name: Profile Change Alerts
 Plugin URI: https://www.littlebizzy.com
 Description: Sends an email both to the WordPress admin and relevant user whenever that user updates any field on their profile (also works with WooCommerce).
-Version: 1.0.0
+Version: 1.0.1
 Author: LittleBizzy
 Author URI: https://www.littlebizzy.com
 License: GPLv3
@@ -22,7 +22,7 @@ if (!function_exists('add_action'))
 // Plugin constants
 define('PRFCHN_FILE', __FILE__);
 define('PRFCHN_PATH', dirname(PRFCHN_FILE));
-define('PRFCHN_VERSION', '1.0.0');
+define('PRFCHN_VERSION', '1.0.1');
 
 // Load core class
 require_once(PRFCHN_PATH.'/core/core.php');
