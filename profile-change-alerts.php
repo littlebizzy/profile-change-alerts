@@ -11,10 +11,6 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Prefix: PRFCHN
 */
 
-// Admin Notices module
-require_once dirname(__FILE__).'/admin-notices.php';
-PRFCHN_Admin_Notices::instance(__FILE__);
-
 // Block direct calls
 if (!function_exists('add_action'))
 	die;
