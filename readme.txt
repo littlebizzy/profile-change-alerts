@@ -1,5 +1,7 @@
 === Profile Change Alerts ===
+
 Contributors: littlebizzy
+Donate link: https://www.patreon.com/littlebizzy
 Tags: https, ssl, http
 Requires at least: 4.4
 Tested up to: 4.8
